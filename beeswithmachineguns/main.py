@@ -136,6 +136,9 @@ commands:
             print 'New bees will use the "default" EC2 security group. Please note that port 22 (SSH) is not normally open on this group. You will need to use to the EC2 tools to open it before you will be able to attack.'
         bees.up(options.servers, options.group, options.zone, options.instance, options.type, options.login, options.key, options.subnet)
     elif command == 'attack':
+        if options.number < 2:
+            parser.error('To avoid a problem with how ab returns data for -n 1, you must make at least two requests')
+
         if not options.url:
             parser.error('To run an attack you need to specify a url with -u')
 
