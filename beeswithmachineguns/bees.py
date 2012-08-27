@@ -487,7 +487,8 @@ def attack(url, n, c, **options):
             'mime_type': options.get('mime_type', ''),
             'tpr': options.get('tpr'),
             'rps': options.get('rps'),
-            'basic_auth': options.get('basic_auth')
+            'basic_auth': options.get('basic_auth'),
+            'keypath': _get_pem_path(key_name)
         })
 
     print 'Stinging URL so it will be cached for the attack.'
@@ -524,11 +525,19 @@ def attack(url, n, c, **options):
     print 'Organizing the swarm.'
     # Spin up processes for connecting to EC2 instances
     pool = Pool(len(params))
-    results = pool.map(_attack, params)
 
-    summarized_results = _summarize_results(results, params, csv_filename)
-    print 'Offensive complete.'
-    _print_results(summarized_results)
+    if enginetype == 'ab' or enginetype == None or enginetype == '':
+        results = pool.map(_attack, params)
+
+        summarized_results = _summarize_results(results, params, csv_filename)
+        print 'Offensive complete.'
+        _print_results(summarized_results)
+    else:
+        enginefile = '%s_engine' % enginetype
+        engine = __import__('beeswithmachineguns.%s' % enginefile,fromlist=["beeswithmachineguns"])
+        results = pool.map(engine._attack,params)
+        print 'Offensive complete.'
+        engine._print_results(results)
 
     print 'The swarm is awaiting new orders.'
 
