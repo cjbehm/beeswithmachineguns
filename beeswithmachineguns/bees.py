@@ -54,11 +54,11 @@ def _read_server_list():
         username = f.readline().strip()
         key_name = f.readline().strip()
         zone = f.readline().strip()
-        text = f.read()
+        text = f.read().strip()
         instance_ids = text.split('\n')
-
+        
         print 'Read %i bees from the roster.' % len(instance_ids)
-
+        
     return (username, key_name, zone, instance_ids)
 
 def _write_server_list(username, key_name, zone, instances):
@@ -427,7 +427,8 @@ def attack(url, n, c, **options):
     post_file = options.get('post_file', '')
     keep_alive = options.get('keep_alive', False)
     basic_auth = options.get('basic_auth', '')
-
+    engine_type = options.get('engine_type','ab')
+    print engine_type
     if csv_filename:
         try:
             stream = open(csv_filename, 'w')
@@ -487,8 +488,7 @@ def attack(url, n, c, **options):
             'mime_type': options.get('mime_type', ''),
             'tpr': options.get('tpr'),
             'rps': options.get('rps'),
-            'basic_auth': options.get('basic_auth'),
-            'keypath': _get_pem_path(key_name)
+            'basic_auth': options.get('basic_auth')
         })
 
     print 'Stinging URL so it will be cached for the attack.'
@@ -526,16 +526,18 @@ def attack(url, n, c, **options):
     # Spin up processes for connecting to EC2 instances
     pool = Pool(len(params))
 
-    if enginetype == 'ab' or enginetype == None or enginetype == '':
+    if engine_type == 'ab' or engine_type == None or engine_type == '':
         results = pool.map(_attack, params)
 
         summarized_results = _summarize_results(results, params, csv_filename)
         print 'Offensive complete.'
         _print_results(summarized_results)
     else:
-        enginefile = '%s_engine' % enginetype
+        enginefile = '%s_engine' % engine_type
         engine = __import__('beeswithmachineguns.%s' % enginefile,fromlist=["beeswithmachineguns"])
         results = pool.map(engine._attack,params)
+
+        summarized_results = dict()
         print 'Offensive complete.'
         engine._print_results(results)
 
