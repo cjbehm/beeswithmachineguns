@@ -119,6 +119,9 @@ commands:
     attack_group.add_option('-A', '--basic_auth', metavar='basic_auth', nargs=1, action='store', dest='basic_auth', default='', type='string',
                             help='BASIC authentication credentials, format auth-username:password (default: None).')
 
+    # Request an alternate engine
+    attack_group.add_option('-E', '--enginetype', metavar='ENGINETYPE', nargs=1, action='store', dest='engine_type', default='ab', type='string')
+
     parser.add_option_group(attack_group)
 
     (options, args) = parser.parse_args()
@@ -155,7 +158,8 @@ commands:
             csv_filename=options.csv_filename,
             tpr=options.tpr,
             rps=options.rps,
-            basic_auth=options.basic_auth
+            basic_auth=options.basic_auth,
+            engine_type=options.engine_type
         )
 
         bees.attack(options.url, options.number, options.concurrent, **additional_options)
